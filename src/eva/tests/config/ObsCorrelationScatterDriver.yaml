@@ -1,35 +1,153 @@
 diagnostics:
-  - diagnostic name: ObsCorrelationScatter
-    comparisons:
-    - - hofx
-      - GsiHofXBc
-    - - hofx
-      - ObsValue
-    - - GsiHofXBc
-      - ObsValue
-    - - omb
-      - GsiombBc
-    figure file type: png
-    ioda experiment files: !ENVVAR ${EVA_TESTS_DIR}/data/amsua_n19.hofx.2020-12-14T21:00:00Z.nc4
-    ioda reference files: !ENVVAR ${EVA_TESTS_DIR}/data/amsua_n19.hofx.2020-12-14T21:00:00Z.nc4
-    marker size: 2
-    output path: ./
-    platforms:
-    - amsua_n19
-  - diagnostic name: ObsCorrelationScatter
-    comparisons:
-    - - hofx
-      - GsiHofXBc
-    - - hofx
-      - ObsValue
-    - - GsiHofXBc
-      - ObsValue
-    - - omb
-      - GsiombBc
-    figure file type: png
-    ioda experiment files: !ENVVAR ${EVA_TESTS_DIR}/data/aircraft.hofx.2020-12-14T21:00:00Z.nc4
-    ioda reference files: !ENVVAR ${EVA_TESTS_DIR}/data/aircraft.hofx.2020-12-14T21:00:00Z.nc4
-    marker size: 2
-    output path: ./
-    platforms:
-    - aircraft
+
+  - data:
+      type: IodaObsSpace
+      datasets:
+      - name: reference
+        filenames: 
+          - !ENVVAR ${EVA_TESTS_DIR}/data/amsua_n19.hofx.2020-12-14T21:00:00Z.nc4
+          - !ENVVAR ${EVA_TESTS_DIR}/data/amsua_n19.hofx.2020-12-15T03:00:00Z.nc4
+        groups: 
+          - hofx
+          - GsiHofXBc
+          - omb
+        metadata:
+          - latitude
+          - station_id
+        variables: brightness_temperature
+        channels: 4-5
+      - name: experiment
+        filename: !ENVVAR ${EVA_TESTS_DIR}/data/amsua_n19.hofx.2020-12-14T21:00:00Z.nc4
+        groups: 
+          - GsiHofXBc
+          - ObsValue
+          - GsiombBc
+        variables: brightness_temperature
+        channels: 4-5
+      - name: metadata
+        filename: !ENVVAR ${EVA_TESTS_DIR}/data/amsua_n19.geovals.2020-12-14T21:00:00Z.nc4
+        metadata:
+          - land_fraction
+      filters:
+        - variable: latitude
+          collection: reference
+          range: 
+            - [-90,-45]
+            - [45:90]
+        - variable: station_id
+          collection: reference
+          range: 
+            - [131,132]
+            - 135
+        - variable: land_fraction
+          collection: metadata
+          range: 
+            - [0.9,1.0]
+            
+      
+    diagnostics:
+    
+      - type: 'plot all variables'
+        figure:
+          layout: [3,1]
+          figure file type: png
+          output path: ./
+        plots:
+        - type: Scatter
+          comparison: 
+           - reference.hofx
+           - reference.ObsValue
+          markersize: 2
+          schema: /path/to/schema.yaml
+        - type: Scatter
+          comparison: 
+           - reference.hofx
+           - experiment.hofx
+          markersize: 2
+          schema: /path/to/schema.yaml      
+        - type: MapScatter
+          difference: 
+           - reference.hofx
+           - experiment.hofx
+          markersize: 2
+          schema: /path/to/schema.yaml        
+      
+      - type: 'plot some variables'
+        figure:
+          layout: [1,1]
+          figure file type: png
+          output path: ./
+        plots:
+        - type: MapScatter
+          channels: 
+          difference: 
+           - reference.hofx.brightness_temperature[2]
+           - experiment.hofx.brightness_temperature[2]
+          markersize: 2
+          schema: /path/to/schema.yaml 
+      
+      
+      
+  - type: ObsCorrelationScatter
+    diagnostic:
+      datasets:
+      - name: reference
+        filename: !ENVVAR ${EVA_TESTS_DIR}/data/aircraft.hofx.2020-12-14T21:00:00Z.nc4
+        groups: 
+          - hofx
+          - GsiHofXBc
+          - omb
+        metadata:
+          - latitude
+          - station_id
+        variables: [air_temperature, eastward_wind, northward_wind]
+      - name: experiment
+        filename: !ENVVAR ${EVA_TESTS_DIR}/data/aircraft.hofx.2020-12-14T21:00:00Z.nc4
+        groups: 
+          - GsiHofXBc
+          - ObsValue
+          - GsiombBc
+        variables: [air_temperature, eastward_wind, northward_wind]
+        channels: 4-5
+      - name: metadata
+        filename: !ENVVAR ${EVA_TESTS_DIR}/data/aircraft.geovals.2020-12-14T21:00:00Z.nc4
+        metadata:
+          - land_fraction
+      filters:
+        - variable: latitude
+          collection: reference
+          range: 
+            - [-90,-45]
+            - [45:90]
+        - variable: station_id
+          collection: reference
+          range: 
+            - [131,132]
+            - 135
+        - variable: land_fraction
+          collection: metadata
+          range: 
+            - [0.9,1.0]
+    figure:
+      layout: [2,2]
+      figure file type: png
+      output path: ./
+    plots:
+      - type: Scatter
+        comparison: 
+         - reference.hofx
+         - reference.ObsValue
+        markersize: 2
+        schema: /path/to/schema.yaml
+      - type: Scatter
+        comparison: 
+         - reference.hofx
+         - experiment.hofx
+        markersize: 2
+        schema: /path/to/schema.yaml      
+      - type: MapScatter
+        difference: 
+         - reference.hofx
+         - experiment.hofx
+        markersize: 2
+        schema: /path/to/schema.yaml 
